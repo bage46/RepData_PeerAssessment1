@@ -19,7 +19,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 ### Loading the data and additional R packages
 
-```{r load, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
    pam_orig <- read.csv("activity.csv",header=T,sep=",")
    library("dplyr")
    library("lattice")
@@ -29,57 +30,85 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 1. Calculate the total number of steps taken per day
 
-```{r calculate_steps, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
    pam_daily <- pam_orig %>% group_by(date) %>% summarise(steps = sum(steps))
 ```
 
 2. Make a histogram of the total number of steps taken each day
 
-```{r hist1, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
    hist(pam_daily$steps, col="light blue",xlab = "Total steps daily", 
         main = "Number of steps per day")
 ```
 
+![plot of chunk hist1](figure/hist1-1.png)
+
 3.  Calculate the mean of the total number of steps taken per day
 
-```{r mean1, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
    mean(pam_daily$steps,na.rm = TRUE)
+```
+
+```
+## [1] 10766.19
 ```
 
 4.  Calculate the median of the total number of steps taken per day
 
-```{r median1, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
    median(pam_daily$steps,na.rm = TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 ### What is the average daily activity pattern?
 
 1. Make a time series plot (i.e. <span style="color:red">type = "l"</span>) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r avg_daily, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
    pam_avg <- pam_orig %>% group_by(interval) %>% summarise(steps = mean(steps,na.rm=TRUE))
    plot(pam_avg$interval,pam_avg$steps,type="l",xlab="5-minute interval",
         ylab="Average number of steps",main="Average daily activity pattern")
 ```
 
+![plot of chunk avg_daily](figure/avg_daily-1.png)
+
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r max_steps, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
    pam_avg$interval[which.max(pam_avg$steps)]
+```
+
+```
+## [1] 835
 ```
 
 ### Imputing missing values
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with <span style="color:red">NA</span>s)
 
-```{r imputed_daily, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
     sum(is.na(pam_orig$steps))
+```
+
+```
+## [1] 2304
 ```
 
 2. Fill in all of the missing values in the dataset
 (The strategy here uses the mean value of each interval to fill in the missing values for the same interval in any given day)
 
-```{r filling, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
     pam_new <- pam_orig
     names(pam_avg)[2] <- "avg_steps"
     pam_merged <- merge(pam_new,pam_avg)
@@ -89,21 +118,34 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 ```
 3. Make a histogram of the total number of steps taken each day
 
-```{r hist2, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
     hist(pam_daily2$steps, col="light blue",xlab = "Total steps daily", 
          main = "Number of steps per day with imputed values")
 ```
 
+![plot of chunk hist2](figure/hist2-1.png)
+
 4. Calculate and report the mean total number of steps taken per day
 
-```{r mean2, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
     mean(pam_daily2$steps,na.rm = TRUE)
+```
+
+```
+## [1] 10766.19
 ```
 
 5. Calculate and report the median total number of steps taken per day
 
-```{r median2, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
     median(pam_daily2$steps,na.rm = TRUE)
+```
+
+```
+## [1] 10766.19
 ```
 
 By comparing the mean and the median values between the two datasets (with missing and filled values) we can notice that the chosen value for replacing the missing data influenced the median number of steps, but the mean value hasn't changed as no new value for the steps variable was introduced in the new dataset.
@@ -114,7 +156,8 @@ The estimates of the total daily number of steps got confirmed by imputing the m
 
 1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r weekday, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
     pam_filled <- pam_filled %>% mutate(day_type = ifelse(grepl("S(at|un)",weekdays(as.Date(pam_filled$date, 
                                         format = "%Y-%m-%d"))),"weekend","weekday"))
     pam_filled$day_type <- as.factor(pam_filled$day_type)
@@ -122,7 +165,8 @@ The estimates of the total daily number of steps got confirmed by imputing the m
 
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
-```{r panel, message=FALSE, warning=FALSE, echo=TRUE}
+
+```r
     pam_avg2 <- pam_filled %>% group_by(interval,day_type) %>% summarise(steps = mean(steps,na.rm=TRUE))
     xyplot(steps ~ interval | day_type,
            data = pam_avg2,
@@ -131,5 +175,7 @@ The estimates of the total daily number of steps got confirmed by imputing the m
            col.line = "blue",
            layout=c(1,2))
 ```
+
+![plot of chunk panel](figure/panel-1.png)
 
 It is evident that the activity pattern between weekends and weekdays differs. The person monitored had more active weekends than weekdays and made more steps throughout the day over the weekends.
